@@ -148,21 +148,39 @@ export const useUIStore = create<UIState>()(
   )
 )
 
+/* --- komponen rangkaian ala Tinkercad-lite --- */
+
+export type ComponentType = 'led' | 'button' | 'pot' | 'buzzer'
+
+export interface CircuitComponent {
+  id: string
+  type: ComponentType
+  pin: number // 0-13 digital; 14-19 = A0-A5
+  color?: string // untuk LED
+}
+
+type ButtonModal = 'INPUT' | 'OUTPUT' | 'INPUT_PULLUP'
+
 interface ArduinoSimulatorState {
-  pins: { [pin: number]: { mode: 'INPUT' | 'OUTPUT' | 'INPUT_PULLUP'; value: number } }
+  pins: { [pin: number]: { mode: ButtonModal; value: number } }
   serialOutput: string[]
   serialInput: string
   isRunning: boolean
-  variables: { [name: string]: any }
-  setPinMode: (pin: number, mode: 'INPUT' | 'OUTPUT' | 'INPUT_PULLUP') => void
+  variables: { [name: string]: unknown }
+  /** komponen yang tempel di rangkaian (mode uji: dibersihkan saat reset) */
+  components: CircuitComponent[]
+  setPinMode: (pin: number, mode: ButtonModal) => void
   digitalWrite: (pin: number, value: number) => void
   digitalRead: (pin: number) => number
   analogWrite: (pin: number, value: number) => void
   analogRead: (pin: number) => number
   serialPrint: (data: string) => void
   serialRead: () => string
-  setVariable: (name: string, value: any) => void
-  getVariable: (name: string) => any
+  setSerialInput: (text: string) => void
+  setVariable: (name: string, value: unknown) => void
+  getVariable: (name: string) => unknown
+  addComponent: (type: ComponentType, pin: number) => void
+  removeComponent: (id: string) => void
   reset: () => void
   setRunning: (running: boolean) => void
 }
@@ -173,6 +191,7 @@ export const useArduinoSimulatorStore = create<ArduinoSimulatorState>((set, get)
   serialInput: '',
   isRunning: false,
   variables: {},
+  components: [],
   setPinMode: (pin, mode) =>
     set((state) => ({
       pins: { ...state.pins, [pin]: { ...state.pins[pin], mode } },
@@ -192,11 +211,80 @@ export const useArduinoSimulatorStore = create<ArduinoSimulatorState>((set, get)
       serialOutput: [...state.serialOutput, data],
     })),
   serialRead: () => get().serialInput,
+  setSerialInput: (text) => set({ serialInput: text }),
   setVariable: (name, value) =>
     set((state) => ({
       variables: { ...state.variables, [name]: value },
     })),
   getVariable: (name) => get().variables[name],
-  reset: () => set({ pins: {}, serialOutput: [], serialInput: '', variables: {} }),
+  addComponent: (type, pin) =>
+    set((state) => {
+      if (state.components.some((c) => c.pin === pin)) return state // 1 komponen per pin
+      const id = `${type}-${pin}-${Date.now().toString(36)}`
+      const color = type === 'led' ? '#FF3333' : undefined
+      return { components: [...state.components, { id, type, pin, color }] }
+    }),
+  removeComponent: (id) =>
+    set((state) => ({ components: state.components.filter((c) => c.id !== id) })),
+  reset: () =>
+    set({ pins: {}, serialOutput: [], serialInput: '', variables: {} }),
   setRunning: (isRunning) => set({ isRunning }),
 }))
+
+/* ============ Sistem Ujian & Anti-Cheat ============ */
+
+export interface ExamParticipant {
+  id: number
+  name: string
+  nim: string
+  kelas: string
+}
+
+export interface ActiveExamSession {
+  sessionId: number
+  module: string
+  topic: string
+  startedAt: string
+}
+
+export interface ExamViolationCounters {
+  info: number
+  warning: number
+  danger: number
+}
+
+interface ExamState {
+  participant: ExamParticipant | null
+  session: ActiveExamSession | null
+  violations: ExamViolationCounters
+  lastEventDetail: { type: string; severity: string; at: number } | null
+  setParticipant: (participant: ExamParticipant | null) => void
+  startSession: (session: ActiveExamSession) => void
+  clearSession: () => void
+  recordViolation: (severity: 'info' | 'warning' | 'danger', type: string) => void
+  resetViolations: () => void
+}
+
+export const useExamStore = create<ExamState>()(
+  persist(
+    (set, get) => ({
+      participant: null,
+      session: null,
+      violations: { info: 0, warning: 0, danger: 0 },
+      lastEventDetail: null,
+      setParticipant: (participant) => set({ participant }),
+      startSession: (session) =>
+        set({ session, violations: { info: 0, warning: 0, danger: 0 }, lastEventDetail: null }),
+      clearSession: () => set({ session: null, violations: { info: 0, warning: 0, danger: 0 }, lastEventDetail: null }),
+      recordViolation: (severity, type) => {
+        const v = get().violations
+        set({
+          violations: { ...v, [severity]: v[severity] + 1 },
+          lastEventDetail: { type, severity, at: Date.now() },
+        })
+      },
+      resetViolations: () => set({ violations: { info: 0, warning: 0, danger: 0 } }),
+    }),
+    { name: 'exam-session' }
+  )
+)

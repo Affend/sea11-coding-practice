@@ -12,7 +12,7 @@ interface CodeEditorProps {
   height?: string
 }
 
-const defaultCCode = `// Selamat datang di SEA Coding Platform!
+export const defaultCCode = `// Selamat datang di SEA Coding Platform!
 // Tulis kode C di sini dan klik "Jalankan"
 
 #include <stdio.h>
@@ -37,7 +37,7 @@ int main() {
     return 0;
 }`
 
-const defaultArduinoCode = `// SEA Arduino Simulator
+export const defaultArduinoCode = `// SEA Arduino Simulator
 // Kode C++ untuk Arduino UNO
 
 #include <Arduino.h>
@@ -93,7 +93,9 @@ export function CodeEditor({ className, onCodeChange, readOnly = false, height =
   const [mounted, setMounted] = React.useState(false)
 
   useEffect(() => {
-    setMounted(true)
+    // defer satu tick agar setState tidak sinkron di effect (hindari cascading render)
+    const t = setTimeout(() => setMounted(true), 0)
+    return () => clearTimeout(t)
   }, [])
 
   useEffect(() => {
@@ -105,7 +107,7 @@ export function CodeEditor({ className, onCodeChange, readOnly = false, height =
     }
   }, [code, onCodeChange])
 
-  const handleEditorDidMount = (editor: Monaco, monaco: any) => {
+  const handleEditorDidMount = (editor: Monaco, monaco: Monaco) => {
     editorRef.current = editor
     
     // Set default code based on language

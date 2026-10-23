@@ -2,6 +2,12 @@ import Link from 'next/link'
 import { MODULES } from '@/lib/utils'
 import { ArrowRight, Zap, Cpu, BookOpen, Users, Trophy, ChevronRight, Code, Play, Video, FileText, Loader2, Sparkles, MousePointer, Target } from 'lucide-react'
 
+/** pseudo-random deterministik (0..1) — pengganti Math.random() agar render tetap murni */
+function seeded(i: number): number {
+  const x = Math.sin(i * 127.1 + 311.7) * 43758.5453
+  return x - Math.floor(x)
+}
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-[#0d1117] text-white">
@@ -46,13 +52,20 @@ export default function Home() {
                 {/* Floating dots */}
                 <div className="absolute inset-0 bg-dots-pattern opacity-30" />
           
-                {/* Floating code particles */}
+                {/* Floating code particles (deterministik agar pure & hydration aman) */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                  {[...Array(20)].map((_, i) => (
-                    <div key={i} className="absolute text-[#0066CC]/15 font-mono text-xs animate-float" style={{left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`, animationDelay: `${Math.random() * 8}s`, animationDuration: `${15 + Math.random() * 10}s`}}>
-                      {['{','}', ';', '()', '[]', '//', '/*', '*/', 'int', 'void', 'return', 'if', 'for', 'while', 'struct', 'printf', 'main'][Math.floor(Math.random() * 16)]}
-                    </div>
-                  ))}
+                  {[...Array(20)].map((_, i) => {
+                    const left = seeded(i) * 100
+                    const top = seeded(i + 40) * 100
+                    const animationDelay = seeded(i + 80) * 8
+                    const animationDuration = 15 + seeded(i + 120) * 10
+                    const text = ['{','}', ';', '()', '[]', '//', '/*', '*/', 'int', 'void', 'return', 'if', 'for', 'while', 'struct', 'printf', 'main'][Math.floor(seeded(i + 160) * 16)]
+                    return (
+                      <div key={i} className="absolute text-[#0066CC]/15 font-mono text-xs animate-float" style={{left: `${left}%`, top: `${top}%`, animationDelay: `${animationDelay}s`, animationDuration: `${animationDuration}s`}}>
+                        {text}
+                      </div>
+                    )
+                  })}
                 </div>
           
                 {/* Subtle noise texture */}

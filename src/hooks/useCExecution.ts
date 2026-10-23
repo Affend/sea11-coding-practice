@@ -29,8 +29,8 @@ const DEFAULT_FLAGS = [
 
 // Configure browsercc to load WASM from public/toolchain
 if (typeof window !== 'undefined') {
-  // @ts-ignore - browsercc global config
-  window.__BROWSERCC_CONFIG__ = {
+  const w = window as unknown as { __BROWSERCC_CONFIG__?: unknown }
+  w.__BROWSERCC_CONFIG__ = {
     clang: {
       wasmUrl: '/toolchain/clang.wasm',
       jsUrl: '/toolchain/clang.js',
@@ -117,8 +117,9 @@ export function useCExecution(): UseCExecutionReturn {
 
       // Initialize and start the instance
       const instance = await WebAssembly.instantiate(result.module, { wasi_snapshot_preview1: wasi.wasiImport })
-      wasi.initialize({ exports: { memory: instance.exports.memory } as any })
-      await wasi.start({ exports: { memory: instance.exports.memory, _start: instance.exports._start } as any })
+      const exp = instance.exports as unknown as { memory: WebAssembly.Memory; _start: () => unknown }
+      wasi.initialize({ exports: { memory: exp.memory } })
+      await wasi.start({ exports: { memory: exp.memory, _start: exp._start } })
 
       if (signal.aborted) throw new Error('Cancelled')
 

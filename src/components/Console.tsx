@@ -7,7 +7,7 @@ import { X, Terminal, Trash2, Copy, Maximize2, Minimize2, Send, Search, Download
 
 export function Console() {
   const { output, error, isRunning, executionTime, memoryUsed, clear } = useExecutionStore()
-  const { serialOutput, serialInput, setRunning: setArduinoRunning } = useArduinoSimulatorStore()
+  const { serialOutput, setSerialInput } = useArduinoSimulatorStore()
   const [isMaximized, setIsMaximized] = React.useState(false)
   const consoleRef = useRef<HTMLDivElement>(null)
   const [localSerialInput, setLocalSerialInput] = React.useState('')
@@ -34,6 +34,7 @@ export function Console() {
 
   const handleSerialSend = () => {
     if (localSerialInput.trim()) {
+      setSerialInput(localSerialInput.trim())   // Serial.read()/available() di simulator membaca ini
       setLocalSerialInput('')
     }
   }
@@ -103,7 +104,7 @@ export function Console() {
           <div className="text-center text-gray-500">
             <Terminal className="w-12 h-12 mx-auto mb-3 opacity-30" />
             <p className="text-sm">Konsol kosong</p>
-            <p className="text-xs mt-1">Klik "Jalankan" untuk mengeksekusi kode</p>
+            <p className="text-xs mt-1">Klik &quot;Jalankan&quot; untuk mengeksekusi kode</p>
           </div>
         </div>
         {isMaximized && (
@@ -160,7 +161,7 @@ export function Console() {
           </div>
           <select
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value as any)}
+            onChange={(e) => setFilterType(e.target.value as 'all' | 'output' | 'error' | 'serial')}
             className="bg-gray-800/60 border border-gray-700/50 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#0066CC] appearance-none"
           >
             <option value="all">Semua</option>

@@ -3,10 +3,10 @@
 import React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { MODULES, type ModuleKey, type Topic } from '@/lib/utils'
-import { useLearningStore, useUIStore } from '@/lib/store'
+import { MODULES, type ModuleKey } from '@/lib/utils'
+import { useLearningStore } from '@/lib/store'
 import { cn } from '@/lib/utils'
-import { ChevronRight, ChevronDown, CheckCircle2, BookOpen, Cpu, Zap, Trophy, X, Code, ArrowLeft } from 'lucide-react'
+import { ShieldAlert, ShieldCheck, CheckCircle2, BookOpen, Cpu, Zap, Trophy, X, Code } from 'lucide-react'
 
 interface SidebarProps {
   isOpen: boolean
@@ -15,17 +15,16 @@ interface SidebarProps {
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname()
-  const { currentModule, currentTopic, progress, totalXP, setCurrentModule, setCurrentTopic } = useLearningStore()
-  const { toggleSidebar } = useUIStore()
+  const { currentModule, currentTopic, progress, totalXP, setCurrentModule } = useLearningStore()
 
   const getTopicProgress = (moduleId: ModuleKey, topicId: string) => {
     return progress[moduleId]?.completedTopics?.includes(topicId) || false
   }
 
   const getModuleProgress = (moduleId: ModuleKey) => {
-    const module = MODULES[moduleId]
+    const mod = MODULES[moduleId]
     const completed = progress[moduleId]?.completedTopics?.length || 0
-    return { completed, total: module.topics.length }
+    return { completed, total: mod.topics.length }
   }
 
   const ModuleIcon = ({ moduleId }: { moduleId: ModuleKey }) => {
@@ -169,6 +168,44 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             )
           })}
         </nav>
+
+        {/* Aksi Khusus - Mode Ujian & Admin */}
+        <div className="px-3 pt-3 border-t border-gray-800 space-y-1">
+          <Link
+            href="/admin"
+            className={cn(
+              'flex items-center gap-3 p-2.5 rounded-xl text-sm transition-colors',
+              pathname.startsWith('/admin')
+                ? 'bg-[#FF3333]/15 text-[#FF8888]'
+                : 'text-gray-400 hover:bg-gray-800/60 hover:text-gray-300'
+            )}
+          >
+            <div className="w-8 h-8 rounded-lg bg-[#FF3333]/15 flex items-center justify-center flex-shrink-0">
+              <ShieldAlert className="w-4 h-4 text-[#FF3333]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-xs text-white">Panel Admin</p>
+              <p className="text-[10px] text-gray-500 truncate">Pantau anti-cheat</p>
+            </div>
+          </Link>
+          <Link
+            href="/exam"
+            className={cn(
+              'flex items-center gap-3 p-2.5 rounded-xl text-sm transition-colors',
+              pathname.startsWith('/exam')
+                ? 'bg-[#00AA55]/15 text-[#66d59a]'
+                : 'text-gray-400 hover:bg-gray-800/60 hover:text-gray-300'
+            )}
+          >
+            <div className="w-8 h-8 rounded-lg bg-[#00AA55]/15 flex items-center justify-center flex-shrink-0">
+              <ShieldCheck className="w-4 h-4 text-[#00AA55]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-xs text-white">Mode Ujian</p>
+              <p className="text-[10px] text-gray-500 truncate">Layar penuh terkunci</p>
+            </div>
+          </Link>
+        </div>
 
         {/* Footer - Figma Style */}
         <div className="p-4 border-t border-gray-800">

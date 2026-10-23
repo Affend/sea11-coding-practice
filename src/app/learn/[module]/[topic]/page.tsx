@@ -10,238 +10,27 @@ import { CodeEditor, LanguageSelector, ThemeSelector } from '@/components/CodeEd
 import { Console } from '@/components/Console'
 import { ArduinoSimulator } from '@/components/ArduinoSimulator'
 import { cn } from '@/lib/utils'
+import { TOPIC_CONTENT } from '@/lib/topic-content'
+import { useExecutionStore } from '@/lib/store'
+import { useCodeRunner } from '@/hooks/useCodeRunner'
 import { Play, Square, RotateCcw, Download, Copy, ChevronLeft, Menu, X, Terminal, Cpu, BookOpen, CheckCircle2, ArrowLeft, ArrowRight, Code } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
-
-const TOPIC_CONTENT: Record<string, { description: string; starterCode: string; arduinoCode?: string; learningObjectives: string[] }> = {
-  'basics': {
-    description: 'Pelajari struktur dasar program C, fungsi main(), dan cara mencetak output ke layar.',
-    starterCode: `// Modul 1: Dasar C & Hello World
-// Tujuan: Mengenal struktur program C
-
-#include <stdio.h>
-
-int main() {
-    // TODO: Cetak "SEA Laboratory" ke layar
-    // Gunakan printf()
-    
-    // TODO: Cetak "Algoritma & Pemrograman C" di baris baru
-    
-    // TODO: Cetak "Struktur Data Arduino UNO" di baris baru
-    
-    return 0;
-}`,
-    learningObjectives: [
-      'Memahami struktur dasar program C',
-      'Menggunakan fungsi printf() untuk output',
-      'Mengenal escape sequence (\\n, \\t, dll)',
-      'Kompilasi dan eksekusi program pertama',
-    ],
-  },
-  'variables': {
-    description: 'Belajar tipe data fundamental: int, float, double, char, dan cara deklarasi variabel.',
-    starterCode: `// Modul 2: Variabel & Tipe Data
-// Tujuan: Menguasai tipe data dan variabel
-
-#include <stdio.h>
-
-int main() {
-    // TODO: Deklarasikan variabel:
-    // - int untuk umur
-    // - float untuk tinggi badan
-    // - char untuk inisial nama
-    // - double untuk nilai presisi tinggi
-    
-    // TODO: Assign nilai ke variabel
-    
-    // TODO: Cetak semua variabel dengan format specifier yang benar
-    // %d untuk int, %f untuk float, %c untuk char, %lf untuk double
-    
-    return 0;
-}`,
-    learningObjectives: [
-      'Mengenal tipe data fundamental C',
-      'Deklarasi dan inisialisasi variabel',
-      'Format specifier untuk printf/scanf',
-      'Konversi tipe data implisit dan eksplisit',
-    ],
-  },
-  'control-flow': {
-    description: 'Menguasai percabangan (if-else, switch) dan perulangan (for, while, do-while).',
-    starterCode: `// Modul 3: Kontrol Aliran
-// Tujuan: Menguasai if-else, switch, dan loop
-
-#include <stdio.h>
-
-int main() {
-    int nilai = 85;
-    
-    // TODO: If-else untuk grade
-    // A: 85-100, B: 70-84, C: 55-69, D: 40-54, E: <40
-    
-    // TODO: Switch case untuk hari (1-7)
-    
-    // TODO: For loop cetak 1-10
-    // TODO: While loop hitung mundur 10-1
-    // TODO: Do-while untuk menu
-    
-    return 0;
-}`,
-    learningObjectives: [
-      'Percabangan if, else if, else',
-      'Switch case untuk multiple conditions',
-      'Perulangan for, while, do-while',
-      'Break dan continue',
-      'Nested loops',
-    ],
-  },
-  'arduino-basics': {
-    description: 'Kenali Arduino UNO, pin digital/analog, dan struktur program setup() dan loop().',
-    starterCode: `// Modul 1: Dasar Arduino & Setup
-// Tujuan: Mengenal Arduino UNO dan struktur program
-
-#include <Arduino.h>
-
-const int LED_PIN = 13;
-
-void setup() {
-    // Inisialisasi pin
-    pinMode(LED_PIN, OUTPUT);
-    
-    // Mulai komunikasi serial
-    Serial.begin(9600);
-    
-    Serial.println("Arduino SIAP!");
-}
-
-void loop() {
-    // TODO: Nyala LED
-    digitalWrite(LED_PIN, HIGH);
-    
-    // TODO: Delay 1 detik
-    delay(1000);
-    
-    // TODO: Matikan LED
-    digitalWrite(LED_PIN, LOW);
-    
-    // TODO: Delay 1 detik
-    delay(1000);
-}`,
-    arduinoCode: `// Modul 1: Dasar Arduino & Setup
-#include <Arduino.h>
-
-const int LED_PIN = 13;
-
-void setup() {
-    pinMode(LED_PIN, OUTPUT);
-    Serial.begin(9600);
-    Serial.println("Arduino SIAP!");
-}
-
-void loop() {
-    digitalWrite(LED_PIN, HIGH);
-    delay(1000);
-    digitalWrite(LED_PIN, LOW);
-    delay(1000);
-}`,
-    learningObjectives: [
-      'Arsitektur Arduino UNO (ATmega328P)',
-      'Pin digital vs analog',
-      'Fungsi setup() dan loop()',
-      'Serial communication',
-      'Digital I/O: pinMode, digitalWrite, digitalRead',
-    ],
-  },
-  'arrays-arduino': {
-    description: 'Manipulasi array di Arduino, buffer sirkuler untuk data sensor.',
-    starterCode: `// Modul 2: Array & Buffer Sirkuler
-// Tujuan: Menguasai array di memori terbatas
-
-#include <Arduino.h>
-
-const int BUFFER_SIZE = 10;
-int sensorBuffer[BUFFER_SIZE];
-int bufferIndex = 0;
-int bufferCount = 0;
-
-void setup() {
-    Serial.begin(9600);
-    // Inisialisasi buffer
-    for (int i = 0; i < BUFFER_SIZE; i++) {
-        sensorBuffer[i] = 0;
-    }
-}
-
-void loop() {
-    // Simulasi baca sensor (0-1023)
-    int sensorValue = analogRead(A0);
-    
-    // TODO: Masukkan ke buffer sirkuler
-    // bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
-    
-    // TODO: Hitung rata-rata
-    // float sum = 0;
-    // for (int i = 0; i < bufferCount; i++) sum += sensorBuffer[i];
-    
-    Serial.print("Sensor: ");
-    Serial.print(sensorValue);
-    // Serial.print(" | Rata-rata: ");
-    // Serial.println(avg);
-    
-    delay(100);
-}`,
-    arduinoCode: `// Modul 2: Array & Buffer Sirkuler
-#include <Arduino.h>
-
-const int BUFFER_SIZE = 10;
-int sensorBuffer[BUFFER_SIZE];
-int bufferIndex = 0;
-int bufferCount = 0;
-
-void setup() {
-    Serial.begin(9600);
-    for (int i = 0; i < BUFFER_SIZE; i++) sensorBuffer[i] = 0;
-}
-
-void loop() {
-    int sensorValue = analogRead(A0);
-    sensorBuffer[bufferIndex] = sensorValue;
-    bufferIndex = (bufferIndex + 1) % BUFFER_SIZE;
-    if (bufferCount < BUFFER_SIZE) bufferCount++;
-    
-    float sum = 0;
-    for (int i = 0; i < bufferCount; i++) sum += sensorBuffer[i];
-    float avg = sum / bufferCount;
-    
-    Serial.print("Sensor: ");
-    Serial.print(sensorValue);
-    Serial.print(" | Avg: ");
-    Serial.println(avg);
-    
-    delay(100);
-}`,
-    learningObjectives: [
-      'Array statis di Arduino (memori SRAM 2KB)',
-      'Buffer sirkuler (circular buffer)',
-      'Moving average filter',
-      'Optimasi memori untuk embedded',
-    ],
-  },
-}
 
 export default function LearnTopicPage() {
   const params = useParams()
   const moduleKey = params.module as ModuleKey
   const topicId = params.topic as string
-  const module = MODULES[moduleKey]
-  const topic = module?.topics.find(t => t.id === topicId)
+  const moduleData = MODULES[moduleKey]
+  const topic = moduleData?.topics.find(t => t.id === topicId)
   const content = TOPIC_CONTENT[topicId]
   const { currentTopic, progress, setCurrentTopic, completeTopic } = useLearningStore()
   const [sidebarOpen, setSidebarOpen] = React.useState(true)
   const [showArduino, setShowArduino] = React.useState(moduleKey === 'arduino')
+  const { run, stop, reset, isCompiling } = useCodeRunner()
+  const executionRunning = useExecutionStore((s) => s.isRunning)
 
-  if (!module || !topic || !content) {
+  if (!moduleData || !topic || !content) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="text-center">
@@ -253,8 +42,8 @@ export default function LearnTopicPage() {
   }
 
   const isCompleted = progress[moduleKey]?.completedTopics?.includes(topicId) || false
-  const prevTopic = module.topics[module.topics.indexOf(topic) - 1]
-  const nextTopic = module.topics[module.topics.indexOf(topic) + 1]
+  const prevTopic = moduleData.topics[moduleData.topics.indexOf(topic) - 1]
+  const nextTopic = moduleData.topics[moduleData.topics.indexOf(topic) + 1]
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex">
@@ -276,7 +65,7 @@ export default function LearnTopicPage() {
               </Link>
               <div>
                 <h1 className="font-bold text-lg text-white">{topic.title}</h1>
-                <p className="text-xs text-gray-500">{module.name} • {topic.estimatedTime}</p>
+                <p className="text-xs text-gray-500">{moduleData.name} • {topic.estimatedTime}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -341,7 +130,7 @@ export default function LearnTopicPage() {
                     💡 Cara Pengerjaan Soal
                   </h4>
                   <ol className="list-decimal list-inside text-xs text-gray-300 space-y-1 pl-1">
-                    <li>Baca instruksi <code className="text-primary font-mono">// TODO:</code> yang ada di editor kode.</li>
+                    <li>Baca instruksi <code className="text-primary font-mono">{'// TODO:'}</code> yang ada di editor kode.</li>
                     <li>Tuliskan sintaks C/C++ yang diminta untuk menyelesaikan soal.</li>
                     <li>Tekan tombol <strong className="text-white">Jalankan (Ctrl+Enter)</strong> untuk mengeksekusi kode di konsol.</li>
                     <li>Jika output sesuai, tekan <strong className="text-white">Selesai (+100 XP)</strong> untuk mengklaim poin.</li>
@@ -433,15 +222,25 @@ export default function LearnTopicPage() {
             {/* Action Buttons - Figma Style */}
             <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3 flex-wrap">
-                <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#0066CC] to-[#00AA55] text-white rounded-xl hover:opacity-90 transition-all font-medium shadow-lg shadow-[#0066CC]/25">
+                <button
+                  onClick={() => void run()}
+                  disabled={isCompiling || executionRunning}
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#0066CC] to-[#00AA55] text-white rounded-xl hover:opacity-90 transition-all font-medium shadow-lg shadow-[#0066CC]/25 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
                   <Play className="w-5 h-5" />
-                  Jalankan (Ctrl+Enter)
+                  {isCompiling ? 'Mengompilasi...' : executionRunning ? 'Menjalankan...' : 'Jalankan (Ctrl+Enter)'}
                 </button>
-                <button className="flex items-center gap-2 px-6 py-3 bg-[#FF3333]/20 text-[#FF3333] rounded-xl hover:bg-[#FF3333]/30 transition-colors font-medium">
+                <button
+                  onClick={stop}
+                  className="flex items-center gap-2 px-6 py-3 bg-[#FF3333]/20 text-[#FF3333] rounded-xl hover:bg-[#FF3333]/30 transition-colors font-medium"
+                >
                   <Square className="w-5 h-5" />
                   Berhenti
                 </button>
-                <button className="flex items-center gap-2 px-6 py-3 bg-gray-800/60 text-gray-300 rounded-xl hover:bg-gray-800 transition-colors font-medium">
+                <button
+                  onClick={() => reset(content.starterCode)}
+                  className="flex items-center gap-2 px-6 py-3 bg-gray-800/60 text-gray-300 rounded-xl hover:bg-gray-800 transition-colors font-medium"
+                >
                   <RotateCcw className="w-5 h-5" />
                   Reset
                 </button>

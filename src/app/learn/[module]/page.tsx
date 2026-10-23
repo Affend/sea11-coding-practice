@@ -10,19 +10,24 @@ import { CodeEditor, LanguageSelector, ThemeSelector } from '@/components/CodeEd
 import { Console } from '@/components/Console'
 import { ArduinoSimulator } from '@/components/ArduinoSimulator'
 import { cn } from '@/lib/utils'
-import { Play, Square, RotateCcw, Download, Copy, ChevronLeft, Menu, X, Terminal, Cpu, BookOpen, CheckCircle2, Code } from 'lucide-react'
+import { defaultCCode, defaultArduinoCode } from '@/components/CodeEditor'
+import { useExecutionStore } from '@/lib/store'
+import { useCodeRunner } from '@/hooks/useCodeRunner'
+import { Play, Square, RotateCcw, Download, Copy, ChevronLeft, Menu, X, Terminal, Cpu, CheckCircle2, Code } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
 export default function LearnModulePage() {
   const params = useParams()
   const moduleKey = params.module as ModuleKey
-  const module = MODULES[moduleKey]
+  const moduleData = MODULES[moduleKey]
   const { currentTopic, progress, setCurrentTopic, completeTopic } = useLearningStore()
   const [sidebarOpen, setSidebarOpen] = React.useState(true)
   const [showArduino, setShowArduino] = React.useState(moduleKey === 'arduino')
+  const executionRunning = useExecutionStore((s) => s.isRunning)
+  const { run, stop, reset } = useCodeRunner()
 
-  if (!module) {
+  if (!moduleData) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="text-center">
@@ -54,8 +59,8 @@ export default function LearnModulePage() {
                 <ChevronLeft className="w-5 h-5 text-gray-400" />
               </Link>
               <div>
-                <h1 className="font-bold text-lg">{module.name}</h1>
-                <p className="text-xs text-gray-500">{module.topics.length} topik • {moduleKey === 'c' ? 'Bahasa C' : 'Arduino C++'}</p>
+                <h1 className="font-bold text-lg">{moduleData.name}</h1>
+                <p className="text-xs text-gray-500">{moduleData.topics.length} topik • {moduleKey === 'c' ? 'Bahasa C' : 'Arduino C++'}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -75,7 +80,7 @@ export default function LearnModulePage() {
             {/* Topic Tabs */}
             <div className="mb-4 overflow-x-auto pb-2">
               <div className="flex gap-2 min-w-max">
-                {module.topics.map((topic, index) => (
+                {moduleData.topics.map((topic, index) => (
                   <Link
                     key={topic.id}
                     href={`/learn/${moduleKey}/${topic.id}`}
@@ -178,15 +183,25 @@ export default function LearnModulePage() {
             {/* Action Buttons */}
             <div className="mt-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <button className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primaryDark transition-colors font-medium">
+                <button
+                  onClick={() => void run()}
+                  disabled={executionRunning}
+                  className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primaryDark transition-colors font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+                >
                   <Play className="w-5 h-5" />
-                  Jalankan (Ctrl+Enter)
+                  {executionRunning ? 'Menjalankan...' : 'Jalankan (Ctrl+Enter)'}
                 </button>
-                <button className="flex items-center gap-2 px-6 py-3 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors font-medium">
+                <button
+                  onClick={stop}
+                  className="flex items-center gap-2 px-6 py-3 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors font-medium"
+                >
                   <Square className="w-5 h-5" />
                   Berhenti
                 </button>
-                <button className="flex items-center gap-2 px-6 py-3 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors font-medium">
+                <button
+                  onClick={() => reset(moduleKey === 'arduino' ? defaultArduinoCode : defaultCCode)}
+                  className="flex items-center gap-2 px-6 py-3 bg-gray-700 text-gray-300 rounded-lg hover:bg-gray-600 transition-colors font-medium"
+                >
                   <RotateCcw className="w-5 h-5" />
                   Reset
                 </button>
