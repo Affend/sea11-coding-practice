@@ -17,6 +17,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Nama dan NIM wajib diisi' }, { status: 400 })
   }
 
-  const participant = upsertParticipant(name, nim, kelas)
+  const participant = await upsertParticipant(name, nim, kelas)
   return NextResponse.json(participant)
 }

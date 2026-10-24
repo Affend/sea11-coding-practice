@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Password admin salah' }, { status: 401 })
   }
 
-  const sessions = listSessions()
+  const sessions = await listSessions()
   return NextResponse.json({
     sessions: sessions.map((s) => ({
       ...s,

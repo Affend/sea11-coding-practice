@@ -96,7 +96,7 @@ Skrip internal: `danger >= 3 || warning >= 10` → diduga curang; `danger >= 1 |
 | Hal | Lokasi / Cara |
 |---|---|
 | Password admin | Env var `ADMIN_PASSWORD` di terminal server. Tanpa env var, default `sea11-admin`. Set via: `cmd /c "set ADMIN_PASSWORD=rahasiasaya&& npm.cmd run dev -- --hostname 0.0.0.0"` |
-| Basis data | `data/sea11.db` (SQLite, better-sqlite3, WAL). Tabel `participants`, `exam_sessions`, `exam_events`. |
+| Basis data | Dual-mode via `@libsql/client`: **LAN (default)** = berkas lokal `data/sea11.db`; **Vercel/cloud** = set env `TURSO_DATABASE_URL` + `TURSO_AUTH_TOKEN` (Turso, SQLite cloud). Tabel `participants`, `exam_sessions`, `exam_events` — dibuat otomatis saat pertama kali DB diakses. |
 | API ujian | `POST /api/exam/login`, `POST /api/exam/start`, `POST /api/exam/events`, `POST /api/exam/end` |
 | API admin | `GET /api/admin/sessions`, `GET /api/admin/sessions/:id` (header `x-admin-key`) |
 | Snapshot kode terakhir | Disimpan di kolom `code_snapshot` saat sesi berakhir. |

@@ -10,9 +10,8 @@
   },
   "dependencies": {
     "@bjorn3/browser_wasi_shim": "^0.4.2",
+    "@libsql/client": "^0.18.0",
     "@monaco-editor/react": "^4.7.0",
-    "@types/better-sqlite3": "^7.6.13",
-    "better-sqlite3": "^12.4.1",
     "browsercc": "^0.1.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.59.0",

@@ -13,12 +13,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   const { id } = await params
   const sessionId = Number(id)
-  const session = getSessionWithParticipant(sessionId)
+  const session = await getSessionWithParticipant(sessionId)
   if (!session) {
     return NextResponse.json({ error: 'Sesi tidak ditemukan' }, { status: 404 })
   }
 
-  const events = getSessionEvents(sessionId)
+  const events = await getSessionEvents(sessionId)
   const counts = {
     info_count: events.filter((e) => e.severity === 'info').length,
     warning_count: events.filter((e) => e.severity === 'warning').length,

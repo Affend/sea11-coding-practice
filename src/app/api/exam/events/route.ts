@@ -14,11 +14,11 @@ export async function POST(request: NextRequest) {
   if (!sessionId || Number.isNaN(sessionId)) {
     return NextResponse.json({ error: 'sessionId wajib diisi' }, { status: 400 })
   }
-  if (!getSession(sessionId)) {
+  if (!(await getSession(sessionId))) {
     return NextResponse.json({ error: 'Sesi tidak ditemukan' }, { status: 404 })
   }
 
   const events = Array.isArray(body.events) ? body.events.slice(0, 500) : []
-  const inserted = insertEvents(sessionId, events)
+  const inserted = await insertEvents(sessionId, events)
   return NextResponse.json({ inserted })
 }

@@ -16,13 +16,13 @@ export async function POST(request: NextRequest) {
   if (!participantId || Number.isNaN(participantId)) {
     return NextResponse.json({ error: 'participantId wajib diisi (login dulu)' }, { status: 400 })
   }
-  if (!getParticipant(participantId)) {
+  if (!(await getParticipant(participantId))) {
     return NextResponse.json({ error: 'Praktikan tidak ditemukan, login ulang' }, { status: 404 })
   }
   if (!moduleSlug || !topic) {
     return NextResponse.json({ error: 'module dan topic wajib diisi' }, { status: 400 })
   }
 
-  const session = createSession(participantId, moduleSlug, topic, body.codeSnapshot || '')
+  const session = await createSession(participantId, moduleSlug, topic, body.codeSnapshot || '')
   return NextResponse.json(session, { status: 201 })
 }
